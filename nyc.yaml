@@ -6,8 +6,7 @@ sources:
         type: TopoJSON
         url: https://tile.nextzen.org/tilezen/vector/v1/all/{z}/{x}/{y}.topojson
         url_params:
-            api_key: global.sdk_mapzen_api_key
-            # api_key: mapzen-UJDfMvY
+            api_key: global.sdk_api_key
     nyc_1924:
         type: Raster
         url: https://maps1.nyc.gov/xyz/1.0.0/photo/1924/{z}/{x}/{y}.png8
