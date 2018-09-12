@@ -1,5 +1,5 @@
 import:
-    - https://gist.githubusercontent.com/burritojustice/12e5f901fd1f48318ad9b1aded1bb2b3/raw/demo.yaml
+    - https://raw.githubusercontent.com/burritojustice/map-assets/master/demo.yaml
 
 sources:
     mapzen:
