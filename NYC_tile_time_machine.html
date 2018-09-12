@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>NYC Maptile Time Machine</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://mapzen.com/js/mapzen.css" />
+    <script src="https://mapzen.com/js/mapzen.min.js"></script>
+    <style>
+        html, body { margin: 0; padding: 0; }
+		#map { 
+			height: 100%; 
+			width: 100%; 
+			position: absolute;
+			z-index: 1;
+			}
+
+		#label {
+		  	width: 33%;
+		  	height: 120px;
+		  	position: absolute;
+		  	top: 0;
+		  	left: 33%;
+		  	z-index: 2;
+		  	opacity: 0.8; 
+			background-color: white;
+			}
+
+      
+    </style>
+  </head>
+  <body>
+  
+		<div id="map"></div>
+		<div id="label" style="text-align: center; color:red" >
+				<p><strong>NYC Map Tile Time Machine</strong></p>
+				<code id="year"></code><br>
+				<code id="neighbourhood"></code>
+		</div>
+		
+		
+    <script>
+
+    	
+		var map = L.Mapzen.map('map', {
+			center: [40.71099, -73.98331],
+			zoom: 15,
+			tangramOptions: {
+			  scene: 'https://mapzen.com/api/scenes/22/823/resources/basic.yaml'
+			}
+		});
+		map.setMaxBounds([[40.4888, -74.2759],[40.9279, -73.6896]]);
+		map.setMinZoom(15);
+		map.setMaxZoom(19);
+    
+    
+    	L.Mapzen.apiKey = 'mapzen-ojDtb4R';
+    	
+    	var geocoderOptions = {
+    		focus: true
+		};
+    	L.Mapzen.hash({
+  			map: map
+		})
+		var geocoder = L.Mapzen.geocoder();
+geocoder.addTo(map);
+
+		
+     function year () {
+			var mapYear;
+			var zoom = Math.floor(map.getZoom());
+			if (zoom < 16) {mapYear = "2016 (zoom in!)"}
+			if (zoom == 16) {mapYear = "1951"}
+			if (zoom > 16) {mapYear = "1924"} 
+			if (zoom > 17) {mapYear = "1924 + 2016 overlays"} 
+
+			var xhttp = new XMLHttpRequest();
+  			xhttp.onreadystatechange = function() {
+    		if (this.readyState == 4 && this.status == 200) {
+    			var response = JSON.parse(this.responseText);
+    			var hood = response.features[0].properties.neighbourhood
+    			var borough = response.features[0].properties.borough
+    			var locality = response.features[0].properties.locality
+    			var county = response.features[0].properties.county
+
+    			console.log(hood + borough + locality)
+    			if (!locality) {locality = county}
+				if (!borough) 
+					{borough = locality}
+      			document.getElementById("neighbourhood").innerHTML = hood + ", " + borough
+    			}
+  			};
+  			var center = map.getCenter()
+  			var lat = center.lat
+  			var lon = center.lng
+  			
+  			url = 'https://search.mapzen.com/v1/reverse?point.lat=' + lat + '&point.lon=' + lon + '&layers=neighbourhood&api_key=mapzen-ojDtb4R'
+  			xhttp.open("GET", url, true);
+  			xhttp.send();
+										
+										
+			document.getElementById("year").innerHTML = mapYear;
+//'https://search.mapzen.com/v1/reverse?point.lat=40.6972&point.lon=-73.9798&layers=neighbourhood&api_key=mapzen-ojDtb4R'
+			
+
+      }
+      
+      year()
+      map.on('load', function(e) {year()} )
+
+      map.on('zoom', function(e) {year()} )
+	  map.on('drag', function(e) {year()} )
+
+      
+		
+    </script>
+  </body>
+</html>

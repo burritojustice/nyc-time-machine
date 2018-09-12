@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>NYC Maptile Time Machine</title>
+    <meta charset="utf-8"/>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" https://unpkg.com/nextzen.js@1.0.0/dist/Nextzen.css" />
+    <script src="https://unpkg.com/nextzen.js@1.0.0/dist/nextzen.js"></script>
+    <style>
+        html, body { margin: 0; padding: 0; }
+		#map { 
+			height: 100%; 
+			width: 100%; 
+			position: absolute;
+			z-index: 1;
+			}
+
+		#label {
+		  	width: 50%;
+		  	height: 120px;
+		  	position: absolute;
+		  	top: 0;
+		  	left: 25%;
+		  	z-index: 2;
+		  	opacity: 0.7; 
+			background-color: white;
+			font: 15px arial;
+			}
+
+      
+    </style>
+  </head>
+  <body>
+  
+		<div id="map"></div>
+		<div id="label" style="text-align: center; color:red" >
+				<p><a href="https://maps.nyc.gov/tiles/">NYC Map Tile</a> Time Machine</p>
+<!-- 				<x id='year0'>1921</x> -  -->
+				<b id="year"></b>
+<!-- 				</x> - <x id='year1'>2016</x> -->
+				<p id="neighbourhood"></p>
+		</div>
+		
+		
+    <script>
+
+    	
+		var map = L.Nextzen.map('map', {
+			center: [40.71099, -73.98331],
+			zoom: 15,
+			tangramOptions: {
+			  scene: 'nyc.yaml'
+			}
+		});
+		map.setMaxBounds([[40.4888, -74.2759],[40.9279, -73.6896]]);
+		map.setMinZoom(15);
+		map.setMaxZoom(19);
+    
+    	var locator = L.Nextzen.locator();
+			locator.setPosition('bottomright');
+			locator.addTo(map);
+    	L.Nextzen.apiKey = 'Nextzen-ojDtb4R';
+    	L.Nextzen.hash({
+  			map: map
+		})
+		var geocoder = L.Nextzen.geocoder();
+		
+		geocoder.addTo(map);
+    	var geocoderOptions = {
+    		focus: true,
+    		position: 'bottomleft'
+		};
+		
+     function year () {
+			var mapYear;
+			var zoom = Math.floor(map.getZoom());
+			if (zoom < 16) {mapYear = "2016 (zoom in!)"}
+			if (zoom == 16) {mapYear = "1951"}
+			if (zoom > 16) {mapYear = "1924"} 
+			if (zoom > 17) {mapYear = "1924 + 2016 overlays"} 
+
+			var xhttp = new XMLHttpRequest();
+  			xhttp.onreadystatechange = function() {
+    		if (this.readyState == 4 && this.status == 200) {
+    			var response = JSON.parse(this.responseText);
+    			var hood = response.features[0].properties.neighbourhood
+    			var borough = response.features[0].properties.borough
+    			var locality = response.features[0].properties.locality
+    			var county = response.features[0].properties.county
+
+    			console.log(hood + borough + locality)
+    			if (!locality) {locality = county}
+				if (!borough) 
+					{borough = locality}
+      			document.getElementById("neighbourhood").innerHTML = hood + ", " + borough
+    			}
+  			};
+  			var center = map.getCenter()
+  			var lat = center.lat
+  			var lon = center.lng
+  			
+  			url = 'https://search.Nextzen.com/v1/reverse?point.lat=' + lat + '&point.lon=' + lon + '&layers=neighbourhood&api_key=Nextzen-ojDtb4R'
+  			xhttp.open("GET", url, true);
+  			xhttp.send();
+										
+										
+			document.getElementById("year").innerHTML = mapYear;
+// 			if (mapYear == "1921") {document.getElementById("year").style.fontWeight = 'bold'}
+			
+
+      }
+      
+      year()
+      map.on('load', function(e) {year()} )
+
+      map.on('zoom', function(e) {year()} )
+	  map.on('drag', function(e) {year()} )
+
+      
+		
+    </script>
+  </body>
+</html>
